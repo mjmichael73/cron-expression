@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cron Expression Builder & Visualizer</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⏰ Cron Expression Builder</h1>
+            <p class="subtitle">Build, visualize, and understand cron schedules with ease</p>
+        </header>
+
+        <!-- Mode Selector -->
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="builder">
+                <span class="mode-icon">🔧</span>
+                Visual Builder
+            </button>
+            <button class="mode-btn" data-mode="expression">
+                <span class="mode-icon">⌨️</span>
+                Expression Editor
+            </button>
+            <button class="mode-btn" data-mode="presets">
+                <span class="mode-icon">📚</span>
+                Common Presets
+            </button>
+        </div>
+
+        <!-- Cron Expression Display -->
+        <div class="expression-display">
+            <div class="expression-header">
+                <h3>Cron Expression</h3>
+                <div class="format-toggle">
+                    <label class="toggle-option">
+                        <input type="radio" name="format" value="linux" checked>
+                        <span>Linux Cron (5 fields)</span>
+                    </label>
+                    <label class="toggle-option">
+                        <input type="radio" name="format" value="extended">
+                        <span>Extended (6 fields with seconds)</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="expression-container">
+                <div class="expression-box">
+                    <code id="cronExpression">0 0 * * *</code>
+                    <button id="copyBtn" class="btn-icon" title="Copy to clipboard">
+                        📋
+                    </button>
+                </div>
+                <div class="expression-labels" id="expressionLabels">
+                    <span class="field-label">minute</span>
+                    <span class="field-label">hour</span>
+                    <span class="field-label">day</span>
+                    <span class="field-label">month</span>
+                    <span class="field-label">weekday</span>
+                </div>
+            </div>
+
+            <div class="human-readable" id="humanReadable">
+                At 12:00 AM, every day
+            </div>
+        </div>
+
+        <!-- Visual Builder Mode -->
+        <div id="builderMode" class="mode-content active">
+            <div class="builder-section">
+                <!-- Minute Field -->
+                <div class="field-group">
+                    <div class="field-header">
+                        <h4>⏱️ Minute</h4>
+                        <span class="field-hint">0-59</span>
+                    </div>
+                    <div class="field-options">
+                        <label class="option-radio">
+                            <input type="radio" name="minute-type" value="every" checked>
+                            <span>Every minute</span>
+                        </label>
+                        <label class="option-radio">
+                            <input type="radio" name="minute-type" value="specific">
+                            <span>Specific minute(s)</span>
+                        </label>
+                        <label class="option-radio">
+                            <input type="radio" name="minute-type" value="interval">
+                            <span>Every</span>
+                            <input type="number" class="interval-input" id="minuteInterval" min="1" max="59" value="5">
+                            <span>minute(s)</span>
+                        </label>
+                        <label class="option-radio">
+                            <input type="radio" name="minute-type" value="range">
+                            <span>Range</span>
+                            <input type="number" class="range-input" id="minuteStart" min="0" max="59" value="0">
+                            <span>to</span>
+                            <input type="number" class="range-input" id="minuteEnd" min="0" max="59" value="30">
+                        </label>
+                    </div>
+                    <div class="specific-values" id="minuteSpecific" style="display: none;">
+                        <div class="values-grid" id="minuteGrid"></div>
+                    </div>
+                </div>
+
+                <!-- Hour Field -->
+                <div class="field-group">
+                    <div class="field-header">
+                        <h4>🕐 Hour</h4>
+                        <span class="field-hint">0-23</span>
+                    </div>
+                    <div class="field-options">
+                        <label class="option-radio">
+                            <input type="radio" name="hour-type" value="every" checked>
+                            <span>Every hour</span>
+                        </label>
+                        <label class="option-radio">
+                            <input type="radio" name="hour-type" value="specific">
+                            <span>Specific hour(s)</span>
+                        </label>
+                        <label class="option-radio">
+                            <input type="radio" name="hour-type" value="interval">
+                            <span>Every</span>
+                            <input type="number" class="interval-input" id="hourInterval" min="1" max="23" value="2">
+                            <span>hour(s)</span>
+                        </label>
+                        <label class="option-radio">
+                            <input type="radio" name="hour-type" value="range">
+                            <span>Range</span>
+                            <input type="number" class="range-input" id="hourStart" min="0" max="23" value="9">
+                            <span>to</span>
+                            <input type="number" class="range-input" id="hourEnd" min="0" max="23" value="17">
+                        </label>
+                    </div>
+                    <div class="specific-values" id="hourSpecific" style="display: none;">
+                        <div class="values-grid" id="hourGrid"></div>
+                    </div>
+                </div>
+
+                <!-- Day of Month Field -->
+                <div class="field-group">
+                    <div class="field-header">
+                        <h4>📅 Day of Month</h4>
+                        <span class="field-hint">1-31</span>
+                    </div>
+                    <div class="field-options">
+                        <label class="option-radio">
+                            <input type="radio" name="day-type" value="every" checked>
+                            <span>Every day</span>
+                        </label>
+                        <label class="option-radio">
+                            <input type="radio" name="day-type" value="specific">
+                            <span>Specific day(s)</span>
+                        </label>
+                        <label class="option-radio">
+                            <input type="radio" name="day-type" value="interval">
+                            <span>Every</span>
+                            <input type="number" class="interval-input" id="dayInterval" min="1" max="31" value="1">
+                            <span>day(s)</span>
+                        </label>
+                        <label class="option-radio">
+                            <input type="radio" name="day-type" value="last">
+                            <span>Last day of month</span>
+                        </label>
+                    </div>
+                    <div class="specific-values" id="daySpecific" style="display: none;">
+                        <div class="values-grid" id="dayGrid"></div>
+                    </div>
+                </div>
+
+                <!-- Month Field -->
+                <div class="field-group">
+                    <div class="field-header">
+                        <h4>📆 Month</h4>
+                        <span class="field-hint">1-12 or JAN-DEC</span>
+                    </div>
+                    <div class="field-options">
+                        <label class="option-radio">
+                            <input type="radio" name="month-type" value="every" checked>
+                            <span>Every month</span>
+                        </label>
+                        <label class="option-radio">
+                            <input type="radio" name="month-type" value="specific">
+                            <span>Specific month(s)</span>
+                        </label>
+                        <label class="option-radio">
+                            <input type="radio" name="month-type" value="interval">
+                            <span>Every</span>
+                            <input type="number" class="interval-input" id="monthInterval" min="1" max="12" value="3">
+                            <span>month(s)</span>
+                        </label>
+                    </div>
+                    <div class="specific-values" id="monthSpecific" style="display: none;">
+                        <div class="month-grid">
+                            <button class="month-btn" data-value="1">Jan</button>
+                            <button class="month-btn" data-value="2">Feb</button>
+                            <button class="month-btn" data-value="3">Mar</button>
+                            <button class="month-btn" data-value="4">Apr</button>
+                            <button class="month-btn" data-value="5">May</button>
+                            <button class="month-btn" data-value="6">Jun</button>
+                            <button class="month-btn" data-value="7">Jul</button>
+                            <button class="month-btn" data-value="8">Aug</button>
+                            <button class="month-btn" data-value="9">Sep</button>
+                            <button class="month-btn" data-value="10">Oct</button>
+                            <button class="month-btn" data-value="11">Nov</button>
+                            <button class="month-btn" data-value="12">Dec</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Day of Week Field -->
+                <div class="field-group">
+                    <div class="field-header">
+                        <h4>📌 Day of Week</h4>
+                        <span class="field-hint">0-6 or SUN-SAT</span>
+                    </div>
+                    <div class="field-options">
+                        <label class="option-radio">
+                            <input type="radio" name="weekday-type" value="every" checked>
+                            <span>Every day</span>
+                        </label>
+                        <label class="option-radio">
+                            <input type="radio" name="weekday-type" value="specific">
+                            <span>Specific day(s)</span>
+                        </label>
+                        <label class="option-radio">
+                            <input type="radio" name="weekday-type" value="weekdays">
+                            <span>Weekdays only (Mon-Fri)</span>
+                        </label>
+                        <label class="option-radio">
+                            <input type="radio" name="weekday-type" value="weekends">
+                            <span>Weekends only (Sat-Sun)</span>
+                        </label>
+                    </div>
+                    <div class="specific-values" id="weekdaySpecific" style="display: none;">
+                        <div class="weekday-grid">
+                            <button class="weekday-btn" data-value="0">Sun</button>
+                            <button class="weekday-btn" data-value="1">Mon</button>
+                            <button class="weekday-btn" data-value="2">Tue</button>
+                            <button class="weekday-btn" data-value="3">Wed</button>
+                            <button class="weekday-btn" data-value="4">Thu</button>
+                            <button class="weekday-btn" data-value="5">Fri</button>
+                            <button class="weekday-btn" data-value="6">Sat</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expression Editor Mode -->
+        <div id="expressionMode" class="mode-content">
+            <div class="editor-section">
+                <h3>Manual Expression Editor</h3>
+                <div class="manual-input">
+                    <input 
+                        type="text" 
+                        id="manualExpression" 
+                        class="expression-input"
+                        placeholder="Enter cron expression (e.g., 0 0 * * *)"
+                        value="0 0 * * *"
+                    >
+                    <button id="parseBtn" class="btn btn-primary">Parse & Validate</button>
+                </div>
+                
+                <div class="syntax-help">
+                    <h4>Cron Syntax Quick Reference</h4>
+                    <table class="syntax-table">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Allowed Values</th>
+                                <th>Special Characters</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Minute</td>
+                                <td>0-59</td>
+                                <td>* , - /</td>
+                            </tr>
+                            <tr>
+                                <td>Hour</td>
+                                <td>0-23</td>
+                                <td>* , - /</td>
+                            </tr>
+                            <tr>
+                                <td>Day of Month</td>
+                                <td>1-31</td>
+                                <td>* , - / L W</td>
+                            </tr>
+                            <tr>
+                                <td>Month</td>
+                                <td>1-12 or JAN-DEC</td>
+                                <td>* , - /</td>
+                            </tr>
+                            <tr>
+                                <td>Day of Week</td>
+                                <td>0-6 or SUN-SAT</td>
+                                <td>* , - / L #</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="special-chars">
+                        <h4>Special Characters</h4>
+                        <ul>
+                            <li><code>*</code> - Any value (every)</li>
+                            <li><code>,</code> - Value list separator (e.g., 1,3,5)</li>
+                            <li><code>-</code> - Range of values (e.g., 1-5)</li>
+                            <li><code>/</code> - Step values (e.g., */5 = every 5)</li>
+                            <li><code>L</code> - Last day of month/week</li>
+                            <li><code>W</code> - Nearest weekday</li>
+                            <li><code>#</code> - Nth occurrence (e.g., 2#1 = first Monday)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Presets Mode -->
+        <div id="presetsMode" class="mode-content">
+            <div class="presets-section">
+                <h3>Common Cron Presets</h3>
+                <div class="presets-grid">
+                    <!-- Presets will be dynamically inserted -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Next Run Times -->
+        <div class="schedule-section">
+            <div class="section-header">
+                <h3>📅 Next Scheduled Runs</h3>
+                <div class="timezone-selector">
+                    <label>Timezone:</label>
+                    <select id="timezoneSelect">
+                        <option value="local">Local Time</option>
+                        <option value="UTC">UTC</option>
+                        <option value="America/New_York">Eastern Time</option>
+                        <option value="America/Los_Angeles">Pacific Time</option>
+                        <option value="Europe/London">London</option>
+                        <option value="Europe/Paris">Paris</option>
+                        <option value="Asia/Tokyo">Tokyo</option>
+                        <option value="Asia/Shanghai">Shanghai</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="schedule-preview">
+                <div class="next-runs" id="nextRuns">
+                    <!-- Next run times will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Visualization -->
+        <div class="calendar-section">
+            <div class="section-header">
+                <h3>📊 Calendar Visualization</h3>
+                <div class="calendar-controls">
+                    <button id="prevMonth" class="btn-icon">◀</button>
+                    <span id="calendarMonth" class="calendar-title">January 2024</span>
+                    <button id="nextMonth" class="btn-icon">▶</button>
+                </div>
+            </div>
+            <div id="calendarView" class="calendar-view">
+                <!-- Calendar will be rendered here -->
+            </div>
+            <div class="calendar-legend">
+                <span class="legend-item">
+                    <span class="legend-color scheduled"></span>
+                    Scheduled run
+                </span>
+                <span class="legend-item">
+                    <span class="legend-color today"></span>
+                    Today
+                </span>
+            </div>
+        </div>
+
+        <!-- GitHub Actions & CI/CD -->
+        <div class="integration-section">
+            <h3>🔧 Integration Examples</h3>
+            <div class="integration-tabs">
+                <button class="int-tab active" data-tab="github">GitHub Actions</button>
+                <button class="int-tab" data-tab="gitlab">GitLab CI</button>
+                <button class="int-tab" data-tab="jenkins">Jenkins</button>
+                <button class="int-tab" data-tab="linux">Linux Crontab</button>
+            </div>
+
+            <div class="integration-content">
+                <div id="github" class="int-panel active">
+                    <pre><code id="githubCode"></code></pre>
+                    <button class="copy-code-btn" data-target="githubCode">Copy Code</button>
+                </div>
+                <div id="gitlab" class="int-panel">
+                    <pre><code id="gitlabCode"></code></pre>
+                    <button class="copy-code-btn" data-target="gitlabCode">Copy Code</button>
+                </div>
+                <div id="jenkins" class="int-panel">
+                    <pre><code id="jenkinsCode"></code></pre>
+                    <button class="copy-code-btn" data-target="jenkinsCode">Copy Code</button>
+                </div>
+                <div id="linux" class="int-panel">
+                    <pre><code id="linuxCode"></code></pre>
+                    <button class="copy-code-btn" data-target="linuxCode">Copy Code</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Built with ❤️ for developers who hate cron syntax • <a href="https://github.com/yourusername/cron-builder" target="_blank">View on GitHub</a></p>
+            <p class="footer-note">All calculations happen in your browser - no data is sent to any server</p>
+        </footer>
+    </div>
+
+    <script src="js/cron-parser.js"></script>
+    <script src="js/presets.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
